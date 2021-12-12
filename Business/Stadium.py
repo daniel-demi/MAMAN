@@ -26,6 +26,10 @@ class Stadium:
     def badStadium():
         return Stadium()
 
+    @staticmethod
+    def resultsSetToStadium(resultSet):
+        return Stadium(stadiumID=resultSet.rows[0][0], capacity=resultSet.rows[0][1], belongsTo=resultSet.rows[0][2])
+
     def __str__(self):
         print("stadiumID=" + str(self.__stadiumID) + ", capacity=" + str(self.__capacity) + ", belongs to=" + str(
             self.__belongsTo))

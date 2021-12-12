@@ -40,6 +40,11 @@ class Player:
     def badPlayer():
         return Player()
 
+    @staticmethod
+    def resultsSetToPlayer(resultSet):
+        return Player(playerID=resultSet.rows[0][0], teamID=resultSet.rows[0][1], age=resultSet.rows[0][2],
+                      height=resultSet.rows[0][3], foot=resultSet.rows[0][4])
+
     def __str__(self):
         print("PlayerID=" + str(self.__playerID) + ", TeamID=" + str(self.__teamID) + ", age=" + str(self.__age)
               + ", height=" + str(self.__height) + ", foot=" + str(self.__foot))
