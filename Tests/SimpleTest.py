@@ -75,6 +75,13 @@ class Test(AbstractTest):
         self.assertEqual(ReturnValue.OK, Solution.deleteMatch(Match(1, "Domestic", 1, 2)), "Should work")
         self.assertEqual(ReturnValue.NOT_EXISTS, Solution.deleteMatch(Match(1, "Domestic", 1, 2)), "Match should not exist")
 
+    def test_getStadiumProfile(self) -> None:
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addStadium(Stadium(1, 500, 1)), "Should work")
+        s = Solution.getStadiumProfile(1)
+        self.assertIsInstance(s, Stadium)
+        self.assertEqual(1, s.getStadiumID(), "Should work")
+
 
 # *** DO NOT RUN EACH TEST MANUALLY ***
 if __name__ == '__main__':

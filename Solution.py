@@ -336,7 +336,30 @@ def addStadium(stadium: Stadium) -> ReturnValue:
 
 
 def getStadiumProfile(stadiumID: int) -> Stadium:
-    pass
+    ret = Stadium.badStadium()
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL("SELECT * FROM Stadium WHERE id={stadiumID};").format(stadiumID=sql.Literal(stadiumID))
+        rows_effected, result = conn.execute(query)
+        if rows_effected == 1:
+            ret = Stadium.resultSetToStadium(result)
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+    except Exception as e:
+        print(e)
+    finally:
+        conn.close()
+        return ret
 
 
 def deleteStadium(stadium: Stadium) -> ReturnValue:
