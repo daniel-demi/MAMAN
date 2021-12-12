@@ -41,7 +41,7 @@ class Player:
         return Player()
 
     @staticmethod
-    def resultsSetToPlayer(resultSet):
+    def resultSetToPlayer(resultSet):
         return Player(playerID=resultSet.rows[0][0], teamID=resultSet.rows[0][1], age=resultSet.rows[0][2],
                       height=resultSet.rows[0][3], foot=resultSet.rows[0][4])
 

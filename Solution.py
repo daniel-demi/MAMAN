@@ -117,7 +117,7 @@ def addTeam(teamID: int) -> ReturnValue:
     try:
         conn = Connector.DBConnector()
         query = sql.SQL("INSERT INTO Teams(id) VALUES({id});").format(id=sql.Literal(teamID))
-        rows_affected, _ = conn.execute(query)
+        rows_effected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
         print(e)
         ret = ReturnValue.ERROR
@@ -151,7 +151,7 @@ def addMatch(match: Match) -> ReturnValue:
             "VALUES({id}, {competition}, {homeId}, {awayId});"
         ).format(id=sql.Literal(match.getMatchID()), competition=sql.Literal(match.getCompetition()),
                  homeId=sql.Literal(match.getHomeTeamID()), awayId=sql.Literal(match.getAwayTeamID()))
-        rows_affected, _ = conn.execute(query)
+        rows_effected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
         print(e)
         ret = ReturnValue.ERROR
@@ -208,8 +208,8 @@ def deleteMatch(match: Match) -> ReturnValue:
     try:
         conn = Connector.DBConnector()
         query = sql.SQL("DELETE FROM Matches WHERE id={matchID};").format(matchID=sql.Literal(match.getMatchID()))
-        rows_affected, _ = conn.execute(query)
-        if rows_affected == 0:
+        rows_effected, _ = conn.execute(query)
+        if rows_effected == 0:
             ret = ReturnValue.NOT_EXISTS
 
     except DatabaseException.ConnectionInvalid as e:
@@ -247,7 +247,7 @@ def addPlayer(player: Player) -> ReturnValue:
             id=sql.Literal(player.getPlayerID()), teamID=sql.Literal(player.getTeamID()),
             age=sql.Literal(player.getAge()), height=sql.Literal(player.getHeight()), foot=sql.Literal(player.getFoot())
         )
-        rows_affected, _ = conn.execute(query)
+        rows_effected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
         print(e)
         ret = ReturnValue.ERROR
@@ -270,8 +270,32 @@ def addPlayer(player: Player) -> ReturnValue:
         conn.close()
         return ret
 
+
 def getPlayerProfile(playerID: int) -> Player:
-    pass
+    ret = Match.badMatch()
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL("SELECT * FROM Players WHERE id={playerID};").format(playerID=sql.Literal(playerID))
+        rows_effected, result = conn.execute(query)
+        if rows_effected == 1:
+            ret = Player.resultSetToPlayer(result)
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+    except Exception as e:
+        print(e)
+    finally:
+        conn.close()
+        return ret
 
 
 def deletePlayer(player: Player) -> ReturnValue:
@@ -287,7 +311,7 @@ def addStadium(stadium: Stadium) -> ReturnValue:
             "INSERT INTO Stadium(id, capacity, belong_to) VALUES({id}, {capacity}, {belongsTo});"
         ).format(id=sql.Literal(stadium.getStadiumID()), capacity=sql.Literal(stadium.getCapacity()),
                  belongsTo=sql.Literal(stadium.getBelongsTo()))
-        rows_affected, _ = conn.execute(query)
+        rows_effected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
         print(e)
         ret = ReturnValue.ERROR

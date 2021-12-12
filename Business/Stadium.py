@@ -27,7 +27,7 @@ class Stadium:
         return Stadium()
 
     @staticmethod
-    def resultsSetToStadium(resultSet):
+    def resultSetToStadium(resultSet):
         return Stadium(stadiumID=resultSet.rows[0][0], capacity=resultSet.rows[0][1], belongsTo=resultSet.rows[0][2])
 
     def __str__(self):
