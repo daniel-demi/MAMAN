@@ -38,6 +38,14 @@ def createTables() -> None:
                            'belong_to INTEGER,' \
                            'FOREIGN KEY (belong_to) REFERENCES Teams(id) ON DELETE CASCADE, ' \
                            'UNIQUE(belong_to))'
+    create_player_scored_match_table = 'CREATE TABLE PlayerScored(' \
+                                       'match_id INTEGER NOT NULL CHECK(match_id > 0),' \
+                                       'player_id INTEGER NOT NULL CHECK(player_id > 0),' \
+                                       'amount INTEGER NOT NULL CHECK(amount > 0),' \
+                                       'FOREIGN KEY (match_id) REFERENCES Matches(id) ON DELETE CASCADE, ' \
+                                       'FOREIGN KEY (player_id) REFERENCES Players(id) ON DELETE CASCADE, ' \
+                                       'PRIMARY KEY (match_id, player_id)' \
+                                       ')'
     try:
         conn = Connector.DBConnector()
         conn.execute(create_teams_table)
@@ -65,10 +73,11 @@ def clearTables() -> None:
     conn = None
     try:
         conn = Connector.DBConnector()
-        conn.execute('DELETE FROM Teams;')
+        conn.execute('DELETE FROM PlayerScored;')
         conn.execute('DELETE FROM Matches;')
         conn.execute('DELETE FROM Players;')
         conn.execute('DELETE FROM Stadium;')
+        conn.execute('DELETE FROM Teams;')
     except DatabaseException.ConnectionInvalid as e:
         print(e)
     except DatabaseException.NOT_NULL_VIOLATION as e:
@@ -392,11 +401,72 @@ def getStadiumProfile(stadiumID: int) -> Stadium:
 
 
 def deleteStadium(stadium: Stadium) -> ReturnValue:
-    pass
+    ret = ReturnValue.OK
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL("DELETE FROM Stadium WHERE id={id};").format(id=sql.Literal(stadium.getStadiumID()))
+        rows_effected, _ = conn.execute(query)
+        if rows_effected == 0:
+            ret = ReturnValue.NOT_EXISTS
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.ALREADY_EXISTS
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except Exception as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    finally:
+        conn.close()
+        return ret
 
 
 def playerScoredInMatch(match: Match, player: Player, amount: int) -> ReturnValue:
-    pass
+    ret = ReturnValue.OK
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "INSERT INTO PlayerScored(match_id, player_id, amount) "
+            "VALUES({match_id}, {player_id}, {amount});"
+        ).format(
+            match_id=sql.Literal(match.getMatchID()), player_id=sql.Literal(player.getPlayerID()),
+            amount=sql.Literal(amount)
+        )
+        rows_effected, _ = conn.execute(query)
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.ALREADY_EXISTS
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.NOT_EXISTS
+    except Exception as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    finally:
+        conn.close()
+        return ret
 
 
 def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:

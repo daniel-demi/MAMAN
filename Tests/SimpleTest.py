@@ -82,6 +82,28 @@ class Test(AbstractTest):
         self.assertIsInstance(s, Stadium)
         self.assertEqual(1, s.getStadiumID(), "Should work")
 
+    def test_getPlayerProfile(self) -> None:
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(Player(1, 1, 20, 185, "Left")), "Should work")
+        s = Solution.getPlayerProfile(1)
+        self.assertIsInstance(s, Player)
+        self.assertEqual(1, s.getPlayerID(), "Should work")
+
+    def test_deletePlayer(self) -> None:
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
+        p = Player(1, 1, 20, 185, "Left")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.deletePlayer(p), "Should work")
+        self.assertEqual(ReturnValue.NOT_EXISTS, Solution.deletePlayer(p), "Player should not exist")
+
+    def test_deleteStadium(self) -> None:
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(2), "Should work")
+        s = Stadium(1, 55000, 1)
+        self.assertEqual(ReturnValue.OK, Solution.addStadium(s), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.deleteStadium(s), "Should work")
+        self.assertEqual(ReturnValue.NOT_EXISTS, Solution.deleteStadium(s), "Stadium should not exist")
+
 
 # *** DO NOT RUN EACH TEST MANUALLY ***
 if __name__ == '__main__':
