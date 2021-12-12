@@ -299,7 +299,36 @@ def getPlayerProfile(playerID: int) -> Player:
 
 
 def deletePlayer(player: Player) -> ReturnValue:
-    pass
+    ret = ReturnValue.OK
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL("DELETE FROM Players WHERE id={playerID};").format(playerID=sql.Literal(player.getPlayerID()))
+        rows_effected, _ = conn.execute(query)
+        if rows_effected == 0:
+            ret = ReturnValue.NOT_EXISTS
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.ALREADY_EXISTS
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except Exception as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    finally:
+        conn.close()
+        return ret
 
 
 def addStadium(stadium: Stadium) -> ReturnValue:
