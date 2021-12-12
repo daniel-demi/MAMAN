@@ -33,6 +33,11 @@ class Match:
     def badMatch():
         return Match()
 
+    @staticmethod
+    def resultSetToMatch(resultSet):
+        return Match(matchID=resultSet.rows[0][0], competition=resultSet.rows[0][1],
+                     homeTeamID=resultSet.rows[0][2], awayTeamID=resultSet.rows[0][3])
+
     def __str__(self):
         print("MatchID=" + str(self.__matchID) + ", competition=" + str(self.__competition) + ", home team=" + str(
             self.__homeTeamID) + ", away team=" + str(self.__awayTeamID))

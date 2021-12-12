@@ -60,6 +60,22 @@ class Test(AbstractTest):
         # my tests
         self.assertEqual(ReturnValue.ALREADY_EXISTS, Solution.addStadium(Stadium(2, 5000, 1)), "Team 1 already owns a stadium")
 
+    def test_getMatchProfile(self) -> None:
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addMatch(Match(1, "Domestic", 1, 2)), "Should work")
+        s = Solution.getMatchProfile(1)
+        self.assertIsInstance(s, Match)
+        self.assertEqual(1, s.getMatchID(), "Should work")
+
+    def test_deleteMatch(self) -> None:
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addMatch(Match(1, "Domestic", 1, 2)), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.deleteMatch(Match(1, "Domestic", 1, 2)), "Should work")
+        self.assertEqual(ReturnValue.NOT_EXISTS, Solution.deleteMatch(Match(1, "Domestic", 1, 2)), "Match should not exist")
+
+
 # *** DO NOT RUN EACH TEST MANUALLY ***
 if __name__ == '__main__':
     unittest.main(verbosity=2, exit=False)
