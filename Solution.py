@@ -11,26 +11,32 @@ from psycopg2 import sql
 def createTables() -> None:
     conn = None
     create_teams_table = 'CREATE TABLE Teams(' \
-                         'id INTEGER PRIMARY KEY' \
+                         'id INTEGER PRIMARY KEY CHECK(id > 0)' \
                          ')'
     create_matches_table = 'CREATE TABLE Matches(' \
-                           'id INTEGER PRIMARY KEY,' \
-                           'competition TEXT VARCHAR(15) NOT NULL,' \
-                           'home_team_id INTEGER NOT NULL, ' \
-                           'away_team_id INTEGER NOT NULL, ' \
-                           'UNIQUE(home_team_id, away_team_id)' \
+                           'id INTEGER PRIMARY KEY CHECK(id > 0),' \
+                           'competition VARCHAR(15) NOT NULL '  \
+                           "CHECK(competition = 'International' or competition = 'Domestic')," \
+                           'home_team_id INTEGER NOT NULL CHECK(home_team_id > 0), ' \
+                           'away_team_id INTEGER NOT NULL CHECK(away_team_id > 0)' \
+                           'CHECK(home_team_id <> away_team_id), ' \
+                           'FOREIGN KEY (home_team_id) REFERENCES Teams(id) ON DELETE CASCADE, ' \
+                           'FOREIGN KEY (away_team_id) REFERENCES Teams(id) ON DELETE CASCADE' \
                            ')'
     create_players_table = 'CREATE TABLE Players(' \
-                           'id INTEGER PRIMARY KEY,' \
-                           'team_id INTEGER NOT NULL,' \
-                           'age INTEGER NOT NULL,' \
-                           'height INTEGER NOT NULL,' \
-                           'preferred_foot VARCHAR(10) NOT NULL' \
+                           'id INTEGER PRIMARY KEY CHECK(id > 0),' \
+                           'team_id INTEGER NOT NULL CHECK(team_id > 0),' \
+                           'age INTEGER NOT NULL CHECK(age > 0),' \
+                           'height INTEGER NOT NULL CHECK(height > 0),' \
+                           'preferred_foot VARCHAR(10) NOT NULL ' \
+                           "CHECK(preferred_foot = 'Left' or preferred_foot = 'Right'), " \
+                           'FOREIGN KEY (team_id) REFERENCES Teams(id) ON DELETE CASCADE' \
                            ')'
     create_stadium_table = 'CREATE TABLE Stadium(' \
-                           'id INTEGER PRIMARY KEY,' \
-                           'capacity INTEGER NOT NULL,' \
+                           'id INTEGER PRIMARY KEY CHECK(id > 0),' \
+                           'capacity INTEGER NOT NULL CHECK(capacity > 0),' \
                            'belong_to INTEGER,' \
+                           'FOREIGN KEY (belong_to) REFERENCES Teams(id) ON DELETE CASCADE, ' \
                            'UNIQUE(belong_to))'
     try:
         conn = Connector.DBConnector()
@@ -59,6 +65,7 @@ def clearTables() -> None:
     conn = None
     try:
         conn = Connector.DBConnector()
+        conn.execute('DELETE FROM Teams;')
         conn.execute('DELETE FROM Matches;')
         conn.execute('DELETE FROM Players;')
         conn.execute('DELETE FROM Stadium;')
@@ -86,6 +93,7 @@ def dropTables() -> None:
         conn.execute('DROP TABLE Matches;')
         conn.execute('DROP TABLE Players;')
         conn.execute('DROP TABLE Stadium;')
+        conn.execute('DROP TABLE Teams;')
     except DatabaseException.ConnectionInvalid as e:
         print(e)
     except DatabaseException.NOT_NULL_VIOLATION as e:
@@ -104,13 +112,11 @@ def dropTables() -> None:
 
 
 def addTeam(teamID: int) -> ReturnValue:
-    if teamID <= 0:
-        return ReturnValue.BAD_PARAMS
     ret = ReturnValue.OK
     conn = None
     try:
         conn = Connector.DBConnector()
-        query = sql.SQL(f"INSERT INTO Teams(id) VALUES({sql.Literal(teamID)});")
+        query = sql.SQL("INSERT INTO Teams(id) VALUES({id});").format(id=sql.Literal(teamID))
         rows_affected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
         print(e)
@@ -120,13 +126,13 @@ def addTeam(teamID: int) -> ReturnValue:
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
         print(e)
-        ret = ReturnValue.ERROR
+        ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
         print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
         print(e)
-        ret = ReturnValue.ERROR
+        ret = ReturnValue.BAD_PARAMS
     except Exception as e:
         print(e)
         ret = ReturnValue.ERROR
@@ -136,7 +142,37 @@ def addTeam(teamID: int) -> ReturnValue:
 
 
 def addMatch(match: Match) -> ReturnValue:
-    pass
+    ret = ReturnValue.OK
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "INSERT INTO Matches(id, competition, home_team_id, away_team_id) "
+            "VALUES({id}, {competition}, {homeId}, {awayId});"
+        ).format(id=sql.Literal(match.getMatchID()), competition=sql.Literal(match.getCompetition()),
+                 homeId=sql.Literal(match.getHomeTeamID()), awayId=sql.Literal(match.getAwayTeamID()))
+        rows_affected, _ = conn.execute(query)
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.ALREADY_EXISTS
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except Exception as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    finally:
+        conn.close()
+        return ret
 
 
 def getMatchProfile(matchID: int) -> Match:
@@ -148,8 +184,39 @@ def deleteMatch(match: Match) -> ReturnValue:
 
 
 def addPlayer(player: Player) -> ReturnValue:
-    pass
-
+    ret = ReturnValue.OK
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "INSERT INTO Players(id, team_id, age, height, preferred_foot) "
+            "VALUES({id}, {teamID}, {age}, {height}, {foot});"
+        ).format(
+            id=sql.Literal(player.getPlayerID()), teamID=sql.Literal(player.getTeamID()),
+            age=sql.Literal(player.getAge()), height=sql.Literal(player.getHeight()), foot=sql.Literal(player.getFoot())
+        )
+        rows_affected, _ = conn.execute(query)
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.ALREADY_EXISTS
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except Exception as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    finally:
+        conn.close()
+        return ret
 
 def getPlayerProfile(playerID: int) -> Player:
     pass
@@ -160,7 +227,36 @@ def deletePlayer(player: Player) -> ReturnValue:
 
 
 def addStadium(stadium: Stadium) -> ReturnValue:
-    pass
+    ret = ReturnValue.OK
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "INSERT INTO Stadium(id, capacity, belong_to) VALUES({id}, {capacity}, {belongsTo});"
+        ).format(id=sql.Literal(stadium.getStadiumID()), capacity=sql.Literal(stadium.getCapacity()),
+                 belongsTo=sql.Literal(stadium.getBelongsTo()))
+        rows_affected, _ = conn.execute(query)
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.ALREADY_EXISTS
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except Exception as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    finally:
+        conn.close()
+        return ret
 
 
 def getStadiumProfile(stadiumID: int) -> Stadium:
