@@ -52,6 +52,7 @@ def createTables() -> None:
         conn.execute(create_matches_table)
         conn.execute(create_players_table)
         conn.execute(create_stadium_table)
+        conn.execute(create_player_scored_match_table)
     except DatabaseException.ConnectionInvalid as e:
         print(e)
     except DatabaseException.NOT_NULL_VIOLATION as e:
@@ -99,6 +100,7 @@ def dropTables() -> None:
     conn = None
     try:
         conn = Connector.DBConnector()
+        conn.execute('DROP TABLE PlayerScored;')
         conn.execute('DROP TABLE Matches;')
         conn.execute('DROP TABLE Players;')
         conn.execute('DROP TABLE Stadium;')
