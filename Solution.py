@@ -472,7 +472,40 @@ def playerScoredInMatch(match: Match, player: Player, amount: int) -> ReturnValu
 
 
 def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
-    pass
+    ret = ReturnValue.OK
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "DELETE FROM PlayerScored WHERE match_id = {matchId} And player_id = {playerId};"
+        ).format(
+            matchId=sql.Literal(match.getMatchID()), playerId=sql.Literal(player.getPlayerID())
+        )
+        rows_effected, _ = conn.execute(query)
+        if rows_effected == 0:
+            ret = ReturnValue.NOT_EXISTS
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.ALREADY_EXISTS
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.NOT_EXISTS
+    except Exception as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    finally:
+        conn.close()
+        return ret
 
 
 def matchInStadium(match: Match, stadium: Stadium, attendance: int) -> ReturnValue:

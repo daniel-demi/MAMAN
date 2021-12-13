@@ -71,9 +71,10 @@ class Test(AbstractTest):
     def test_deleteMatch(self) -> None:
         self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
         self.assertEqual(ReturnValue.OK, Solution.addTeam(2), "Should work")
-        self.assertEqual(ReturnValue.OK, Solution.addMatch(Match(1, "Domestic", 1, 2)), "Should work")
-        self.assertEqual(ReturnValue.OK, Solution.deleteMatch(Match(1, "Domestic", 1, 2)), "Should work")
-        self.assertEqual(ReturnValue.NOT_EXISTS, Solution.deleteMatch(Match(1, "Domestic", 1, 2)), "Match should not exist")
+        m = Match(1, "Domestic", 1, 2)
+        self.assertEqual(ReturnValue.OK, Solution.addMatch(m), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.deleteMatch(m), "Should work")
+        self.assertEqual(ReturnValue.NOT_EXISTS, Solution.deleteMatch(m), "Match should not exist")
 
     def test_getStadiumProfile(self) -> None:
         self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
@@ -103,6 +104,31 @@ class Test(AbstractTest):
         self.assertEqual(ReturnValue.OK, Solution.addStadium(s), "Should work")
         self.assertEqual(ReturnValue.OK, Solution.deleteStadium(s), "Should work")
         self.assertEqual(ReturnValue.NOT_EXISTS, Solution.deleteStadium(s), "Stadium should not exist")
+
+    def test_playerScoredInMatch(self) -> None:
+        m = Match(1, "Domestic", 1, 2)
+        p = Player(1, 1, 20, 185, "Left")
+        self.assertEqual(ReturnValue.NOT_EXISTS, Solution.playerScoredInMatch(m, p, 1), "player/match does not exist")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addMatch(m), "Should work")
+        self.assertEqual(ReturnValue.BAD_PARAMS, Solution.playerScoredInMatch(m, p, 0), "amount is not positive")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m, p, 2), "Should work")
+        self.assertEqual(ReturnValue.ALREADY_EXISTS, Solution.playerScoredInMatch(m, p, 2), "player already scored in this match")
+
+    def test_playerDidntScoreInMatch(self) -> None:
+        m = Match(1, "Domestic", 1, 2)
+        p = Player(1, 1, 20, 185, "Left")
+        self.assertEqual(ReturnValue.NOT_EXISTS, Solution.playerDidntScoreInMatch(m, p), "player/match does not exist")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p), "Should work")
+        self.assertEqual(ReturnValue.NOT_EXISTS, Solution.playerDidntScoreInMatch(m, p), "match does not exist")
+        self.assertEqual(ReturnValue.OK, Solution.addMatch(m), "Should work")
+        self.assertEqual(ReturnValue.NOT_EXISTS, Solution.playerDidntScoreInMatch(m, p), "player did not already score in match")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m, p, 2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerDidntScoreInMatch(m, p), "Should work")
 
 
 # *** DO NOT RUN EACH TEST MANUALLY ***
