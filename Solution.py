@@ -38,7 +38,7 @@ def createTables() -> None:
                            'belong_to INTEGER,' \
                            'FOREIGN KEY (belong_to) REFERENCES Teams(id) ON DELETE CASCADE, ' \
                            'UNIQUE(belong_to))'
-    create_player_scored_match_table = 'CREATE TABLE PlayerScored(' \
+    create_player_scored_match_table = 'CREATE TABLE player_scored(' \
                                        'match_id INTEGER NOT NULL CHECK(match_id > 0),' \
                                        'player_id INTEGER NOT NULL CHECK(player_id > 0),' \
                                        'amount INTEGER NOT NULL CHECK(amount > 0),' \
@@ -46,6 +46,13 @@ def createTables() -> None:
                                        'FOREIGN KEY (player_id) REFERENCES Players(id) ON DELETE CASCADE, ' \
                                        'PRIMARY KEY (match_id, player_id)' \
                                        ')'
+    create_match_in_stadium_table = 'CREATE TABLE match_in_stadium(' \
+                                    'match_id INTEGER PRIMARY KEY CHECK(match_id > 0), ' \
+                                    'stadium_id INTEGER NOT NULL CHECK(stadium_id > 0), ' \
+                                    'attendance INTEGER NOT NULL CHECK(attendance >= 0), ' \
+                                    'FOREIGN KEY (match_id) REFERENCES Matches(id) ON DELETE CASCADE, ' \
+                                    'FOREIGN KEY (stadium_id) REFERENCES Stadium(id) ON DELETE CASCADE ' \
+                                    ')'
     try:
         conn = Connector.DBConnector()
         conn.execute(create_teams_table)
@@ -53,6 +60,7 @@ def createTables() -> None:
         conn.execute(create_players_table)
         conn.execute(create_stadium_table)
         conn.execute(create_player_scored_match_table)
+        conn.execute(create_match_in_stadium_table)
     except DatabaseException.ConnectionInvalid as e:
         print(e)
     except DatabaseException.NOT_NULL_VIOLATION as e:
@@ -74,7 +82,8 @@ def clearTables() -> None:
     conn = None
     try:
         conn = Connector.DBConnector()
-        conn.execute('DELETE FROM PlayerScored;')
+        conn.execute('DELETE FROM player_scored;')
+        conn.execute('DELETE FROM match_in_stadium;')
         conn.execute('DELETE FROM Matches;')
         conn.execute('DELETE FROM Players;')
         conn.execute('DELETE FROM Stadium;')
@@ -100,7 +109,8 @@ def dropTables() -> None:
     conn = None
     try:
         conn = Connector.DBConnector()
-        conn.execute('DROP TABLE PlayerScored;')
+        conn.execute('DROP TABLE player_scored;')
+        conn.execute('DROP TABLE match_in_stadium;')
         conn.execute('DROP TABLE Matches;')
         conn.execute('DROP TABLE Players;')
         conn.execute('DROP TABLE Stadium;')
@@ -441,7 +451,7 @@ def playerScoredInMatch(match: Match, player: Player, amount: int) -> ReturnValu
     try:
         conn = Connector.DBConnector()
         query = sql.SQL(
-            "INSERT INTO PlayerScored(match_id, player_id, amount) "
+            "INSERT INTO player_scored(match_id, player_id, amount) "
             "VALUES({match_id}, {player_id}, {amount});"
         ).format(
             match_id=sql.Literal(match.getMatchID()), player_id=sql.Literal(player.getPlayerID()),
@@ -477,7 +487,7 @@ def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
     try:
         conn = Connector.DBConnector()
         query = sql.SQL(
-            "DELETE FROM PlayerScored WHERE match_id = {matchId} And player_id = {playerId};"
+            "DELETE FROM player_scored WHERE match_id = {matchId} And player_id = {playerId};"
         ).format(
             matchId=sql.Literal(match.getMatchID()), playerId=sql.Literal(player.getPlayerID())
         )
@@ -509,19 +519,151 @@ def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
 
 
 def matchInStadium(match: Match, stadium: Stadium, attendance: int) -> ReturnValue:
-    pass
+    ret = ReturnValue.OK
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "INSERT INTO match_in_stadium(match_id, stadium_id, attendance) "
+            "VALUES({matchId}, {stadiumId}, {attendance});"
+        ).format(
+            matchId=sql.Literal(match.getMatchID()), stadiumId=sql.Literal(stadium.getStadiumID()),
+            attendance=sql.Literal(attendance)
+        )
+        rows_effected, _ = conn.execute(query)
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.ALREADY_EXISTS
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.NOT_EXISTS
+    except Exception as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    finally:
+        conn.close()
+        return ret
 
 
 def matchNotInStadium(match: Match, stadium: Stadium) -> ReturnValue:
-    pass
+    ret = ReturnValue.OK
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "DELETE FROM match_in_stadium WHERE match_id = {matchId} And stadium_id = {stadiumId};"
+        ).format(
+            matchId=sql.Literal(match.getMatchID()), stadiumId=sql.Literal(stadium.getStadiumID())
+        )
+        rows_effected, _ = conn.execute(query)
+        if rows_effected == 0:
+            ret = ReturnValue.NOT_EXISTS
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.BAD_PARAMS
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.ALREADY_EXISTS
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = ReturnValue.NOT_EXISTS
+    except Exception as e:
+        print(e)
+        ret = ReturnValue.ERROR
+    finally:
+        conn.close()
+        return ret
 
 
 def averageAttendanceInStadium(stadiumID: int) -> float:
-    pass
+    ret = 0
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "SELECT AVG(attendance) FROM match_in_stadium WHERE stadium_id = {stadiumID}"
+        ).format(stadiumID=sql.Literal(stadiumID))
+        rows_effected, result = conn.execute(query)
+        if result.rows[0][0]:
+            ret = result.rows[0][0]
+        else:
+            ret = 0
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = -1
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = -1
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = -1
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = -1
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = -1
+    except Exception as e:
+        print(e)
+        ret = -1
+    finally:
+        conn.close()
+        return ret
 
 
 def stadiumTotalGoals(stadiumID: int) -> int:
-    pass
+    ret = 0
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "SELECT SUM(amount) "
+            "FROM match_in_stadium "
+            "LEFT JOIN player_scored ON match_in_stadium.match_id = player_scored.match_id "
+            "WHERE match_in_stadium.stadium_id = {stadiumID}"
+        ).format(stadiumID=sql.Literal(stadiumID))
+        rows_effected, result = conn.execute(query)
+        if result.rows[0][0]:
+            ret = result.rows[0][0]
+        else:
+            ret = 0
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = -1
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = -1
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = -1
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = -1
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = -1
+    except Exception as e:
+        print(e)
+        ret = -1
+    finally:
+        conn.close()
+        return ret
 
 
 def playerIsWinner(playerID: int, matchID: int) -> bool:
