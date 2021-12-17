@@ -13,6 +13,7 @@ def createTables() -> None:
     create_teams_table = 'CREATE TABLE Teams(' \
                          'id INTEGER PRIMARY KEY CHECK(id > 0)' \
                          ')'
+
     create_matches_table = 'CREATE TABLE Matches(' \
                            'id INTEGER PRIMARY KEY CHECK(id > 0),' \
                            'competition VARCHAR(15) NOT NULL '  \
@@ -23,6 +24,7 @@ def createTables() -> None:
                            'FOREIGN KEY (home_team_id) REFERENCES Teams(id) ON DELETE CASCADE, ' \
                            'FOREIGN KEY (away_team_id) REFERENCES Teams(id) ON DELETE CASCADE' \
                            ')'
+
     create_players_table = 'CREATE TABLE Players(' \
                            'id INTEGER PRIMARY KEY CHECK(id > 0),' \
                            'team_id INTEGER NOT NULL CHECK(team_id > 0),' \
@@ -32,12 +34,14 @@ def createTables() -> None:
                            "CHECK(preferred_foot = 'Left' or preferred_foot = 'Right'), " \
                            'FOREIGN KEY (team_id) REFERENCES Teams(id) ON DELETE CASCADE' \
                            ')'
+
     create_stadium_table = 'CREATE TABLE Stadium(' \
                            'id INTEGER PRIMARY KEY CHECK(id > 0),' \
                            'capacity INTEGER NOT NULL CHECK(capacity > 0),' \
                            'belong_to INTEGER,' \
                            'FOREIGN KEY (belong_to) REFERENCES Teams(id) ON DELETE CASCADE, ' \
                            'UNIQUE(belong_to))'
+
     create_player_scored_match_table = 'CREATE TABLE player_scored(' \
                                        'match_id INTEGER NOT NULL CHECK(match_id > 0),' \
                                        'player_id INTEGER NOT NULL CHECK(player_id > 0),' \
@@ -46,6 +50,7 @@ def createTables() -> None:
                                        'FOREIGN KEY (player_id) REFERENCES Players(id) ON DELETE CASCADE, ' \
                                        'PRIMARY KEY (match_id, player_id)' \
                                        ')'
+
     create_match_in_stadium_table = 'CREATE TABLE match_in_stadium(' \
                                     'match_id INTEGER PRIMARY KEY CHECK(match_id > 0), ' \
                                     'stadium_id INTEGER NOT NULL CHECK(stadium_id > 0), ' \
@@ -53,6 +58,16 @@ def createTables() -> None:
                                     'FOREIGN KEY (match_id) REFERENCES Matches(id) ON DELETE CASCADE, ' \
                                     'FOREIGN KEY (stadium_id) REFERENCES Stadium(id) ON DELETE CASCADE ' \
                                     ')'
+
+    create_active_teams_view = 'CREATE VIEW active_teams_view AS ' \
+                               'SELECT home_team_id team_id FROM Matches ' \
+                               'UNION DISTINCT ' \
+                               'SELECT away_team_id team_id FROM Matches'
+
+    creat_rich_teams_view = 'CREATE VIEW rich_teams_view AS ' \
+                            'SELECT DISTINCT belong_to team_id ' \
+                            'FROM Stadium ' \
+                            'WHERE capacity > 55000 '
     try:
         conn = Connector.DBConnector()
         conn.execute(create_teams_table)
@@ -61,6 +76,8 @@ def createTables() -> None:
         conn.execute(create_stadium_table)
         conn.execute(create_player_scored_match_table)
         conn.execute(create_match_in_stadium_table)
+        conn.execute(create_active_teams_view)
+        conn.execute(creat_rich_teams_view)
     except DatabaseException.ConnectionInvalid as e:
         print(e)
     except DatabaseException.NOT_NULL_VIOLATION as e:
@@ -111,6 +128,8 @@ def dropTables() -> None:
         conn = Connector.DBConnector()
         conn.execute('DROP TABLE player_scored;')
         conn.execute('DROP TABLE match_in_stadium;')
+        conn.execute('DROP VIEW active_teams_view;')
+        conn.execute('DROP VIEW rich_teams_view;')
         conn.execute('DROP TABLE Matches;')
         conn.execute('DROP TABLE Players;')
         conn.execute('DROP TABLE Stadium;')
@@ -667,19 +686,194 @@ def stadiumTotalGoals(stadiumID: int) -> int:
 
 
 def playerIsWinner(playerID: int, matchID: int) -> bool:
-    pass
+    ret = False
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "SELECT SUM(amount) >=  "
+            "(cast((SELECT SUM(amount) FROM player_scored WHERE match_id = {matchID}) as decimal) / 2)"
+            "FROM player_scored "
+            "WHERE match_id = {matchID} AND player_id = {playerID}"
+        ).format(playerID=sql.Literal(playerID), matchID=sql.Literal(matchID))
+        rows_effected, result = conn.execute(query)
+        if result.rows[0][0]:
+            ret = result.rows[0][0]
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = False
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = False
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = False
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = False
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = False
+    except Exception as e:
+        print(e)
+        ret = False
+    finally:
+        conn.close()
+        return ret
 
 
 def getActiveTallTeams() -> List[int]:
-    pass
+    ret = []
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "SELECT team_id "
+            "FROM Players "
+            "WHERE height >= 190 AND team_id IN (SELECT * FROM active_teams_view) "
+            "GROUP BY team_id "
+            "HAVING COUNT(height) >= 2 "
+            "ORDER BY team_id DESC "
+            "LIMIT 5"
+        )
+        rows_effected, result = conn.execute(query)
+        if result.rows[0][0]:
+            for i in range(0, len(result.rows)):
+                ret.append(result.rows[i][0])
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = []
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = []
+    except Exception as e:
+        print(e)
+        ret = []
+    finally:
+        conn.close()
+        return ret
 
 
 def getActiveTallRichTeams() -> List[int]:
-    pass
+    ret = []
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            "SELECT team_id "
+            "FROM Players "
+            "WHERE height >= 190 AND team_id IN (SELECT * FROM active_teams_view) "
+            "AND team_id IN (SELECT * FROM rich_teams_view)"
+            "GROUP BY team_id "
+            "HAVING COUNT(height) >= 2 "
+            "ORDER BY team_id DESC "
+            "LIMIT 5"
+        )
+        rows_effected, result = conn.execute(query)
+        if result.rows[0][0]:
+            for i in range(0, len(result.rows)):
+                ret.append(result.rows[i][0])
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = []
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = []
+    except Exception as e:
+        print(e)
+        ret = []
+    finally:
+        conn.close()
+        return ret
 
 
 def popularTeams() -> List[int]:
-    pass
+    ret = []
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            'SELECT home_team_id id '
+            'FROM Matches M '
+            'LEFT JOIN match_in_stadium ON match_in_stadium.match_id = M.id '
+            'WHERE  40000 < ALL('
+                'SELECT attendance '
+                'FROM match_in_stadium '
+                'WHERE match_in_stadium.stadium_id = ('
+                    'SELECT id '
+                    'FROM Stadium '
+                    'WHERE belong_to = M.home_team_id'
+                ')'
+            ') AND stadium_id IS NOT NULL '
+            'UNION DISTINCT '
+            'SELECT id '
+            'FROM Teams '
+            'WHERE id NOT IN ('
+                'SELECT team_id '
+                'FROM active_teams_view'
+            ') '
+            'UNION DISTINCT '
+            'SELECT id '
+            'FROM Teams T '
+            'WHERE id IN ('
+                'SELECT team_id '
+                'FROM active_teams_view'
+            ') '
+            'AND ('
+                'SELECT COUNT(home_team_id) '
+                'FROM Matches '
+                'WHERE home_team_id = T.id '
+            ') = 0 '
+            'ORDER BY id DESC '
+            'LIMIT 10'
+        )
+        rows_effected, result = conn.execute(query)
+        if result.rows[0][0]:
+            for i in range(0, len(result.rows)):
+                ret.append(result.rows[i][0])
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = []
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = []
+    except Exception as e:
+        print(e)
+        ret = []
+    finally:
+        conn.close()
+        return ret
 
 
 def getMostAttractiveStadiums() -> List[int]:
