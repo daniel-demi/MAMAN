@@ -877,12 +877,112 @@ def popularTeams() -> List[int]:
 
 
 def getMostAttractiveStadiums() -> List[int]:
-    pass
+    ret = []
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            'SELECT stadium_id '
+            'FROM ('
+                'SELECT stadium_id, SUM(amount) total '
+                'FROM match_in_stadium '
+                'LEFT JOIN player_scored ON match_in_stadium.match_id = player_scored.match_id '
+                'GROUP BY stadium_id '
+                'ORDER BY total DESC, stadium_id'
+            ') x'
+        )
+        rows_effected, result = conn.execute(query)
+        if result.rows[0][0]:
+            for i in range(0, len(result.rows)):
+                ret.append(result.rows[i][0])
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = []
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = []
+    except Exception as e:
+        print(e)
+        ret = []
+    finally:
+        conn.close()
+        return ret
 
 
 def mostGoalsForTeam(teamID: int) -> List[int]:
-    pass
+    ret = []
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            'SELECT player_id '
+            'FROM ('
+                'SELECT player_id, SUM(amount) total '
+                'FROM player_scored '
+                'LEFT JOIN players ON player_scored.player_id = players.id '
+                'WHERE team_id = {teamID} '
+                'GROUP BY player_id '
+                'ORDER BY total DESC , player_id DESC '
+                'LIMIT 5'
+            ') x'
+        ).format(teamID=sql.Literal(teamID))
+        rows_effected, result = conn.execute(query)
+        if result.rows[0][0]:
+            for i in range(0, len(result.rows)):
+                ret.append(result.rows[i][0])
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = []
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = []
+    except Exception as e:
+        print(e)
+        ret = []
+    finally:
+        conn.close()
+        return ret
 
 
 def getClosePlayers(playerID: int) -> List[int]:
     pass
+"""
+'SELECT player_id
+FROM (SELECT COUNT(*) num, PS2.player_id
+    FROM player_scored PS1
+    LEFT JOIN player_scored PS2 ON PS1.player_id != PS2.player_id
+    WHERE PS1.match_id = PS2.match_id AND PS1.player_id = '1'
+    GROUP BY PS2.player_id
+) x
+WHERE x.num >= (SELECT COUNT(*) FROM player_scored WHERE player_id = '1')/2
+UNION DISTINCT
+SELECT distinct id as player_id
+FROM (SELECT id
+	  FROM Players
+        ) AS id2, (SELECT player_id
+					  FROM player_scored
+					  WHERE player_id = '1') AS id1
+WHERE id1.player_id != '1' AND id2.id != '1'
+ORDER BY player_id
+LIMIT 10'
+"""
