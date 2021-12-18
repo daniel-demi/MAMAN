@@ -64,7 +64,7 @@ def createTables() -> None:
                                'UNION DISTINCT ' \
                                'SELECT away_team_id team_id FROM Matches'
 
-    creat_rich_teams_view = 'CREATE VIEW rich_teams_view AS ' \
+    create_rich_teams_view = 'CREATE VIEW rich_teams_view AS ' \
                             'SELECT DISTINCT belong_to team_id ' \
                             'FROM Stadium ' \
                             'WHERE capacity > 55000 '
@@ -77,7 +77,7 @@ def createTables() -> None:
         conn.execute(create_player_scored_match_table)
         conn.execute(create_match_in_stadium_table)
         conn.execute(create_active_teams_view)
-        conn.execute(creat_rich_teams_view)
+        conn.execute(create_rich_teams_view)
     except DatabaseException.ConnectionInvalid as e:
         print(e)
     except DatabaseException.NOT_NULL_VIOLATION as e:
