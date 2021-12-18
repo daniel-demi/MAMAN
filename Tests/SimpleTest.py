@@ -369,6 +369,7 @@ class Test(AbstractTest):
         self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m, p3, 2), "Should work")
         self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m3, p3, 1), "Should work")
         self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m2, p3, 1), "Should work")
+        self.assertEqual([2,3], Solution.getClosePlayers(1), "should work")
 
 
 # *** DO NOT RUN EACH TEST MANUALLY ***

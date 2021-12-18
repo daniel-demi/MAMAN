@@ -813,43 +813,43 @@ def popularTeams() -> List[int]:
     conn = None
     try:
         conn = Connector.DBConnector()
-        query = sql.SQL(
-            'SELECT home_team_id id '
-            'FROM Matches M '
-            'LEFT JOIN match_in_stadium ON match_in_stadium.match_id = M.id '
-            'WHERE  40000 < ALL('
+        rows_effected, result = conn.execute(query)
+        if result.rows[0][0]:
+            query = sql.SQL(
+                'SELECT home_team_id id '
+                'FROM Matches M '
+                'LEFT JOIN match_in_stadium ON match_in_stadium.match_id = M.id '
+                'WHERE  40000 < ALL('
                 'SELECT attendance '
                 'FROM match_in_stadium '
                 'WHERE match_in_stadium.stadium_id = ('
-                    'SELECT id '
-                    'FROM Stadium '
-                    'WHERE belong_to = M.home_team_id'
+                'SELECT id '
+                'FROM Stadium '
+                'WHERE belong_to = M.home_team_id'
                 ')'
-            ') AND stadium_id IS NOT NULL '
-            'UNION DISTINCT '
-            'SELECT id '
-            'FROM Teams '
-            'WHERE id NOT IN ('
+                ') AND stadium_id IS NOT NULL '
+                'UNION DISTINCT '
+                'SELECT id '
+                'FROM Teams '
+                'WHERE id NOT IN ('
                 'SELECT team_id '
                 'FROM active_teams_view'
-            ') '
-            'UNION DISTINCT '
-            'SELECT id '
-            'FROM Teams T '
-            'WHERE id IN ('
+                ') '
+                'UNION DISTINCT '
+                'SELECT id '
+                'FROM Teams T '
+                'WHERE id IN ('
                 'SELECT team_id '
                 'FROM active_teams_view'
-            ') '
-            'AND ('
+                ') '
+                'AND ('
                 'SELECT COUNT(home_team_id) '
                 'FROM Matches '
                 'WHERE home_team_id = T.id '
-            ') = 0 '
-            'ORDER BY id DESC '
-            'LIMIT 10'
-        )
-        rows_effected, result = conn.execute(query)
-        if result.rows[0][0]:
+                ') = 0 '
+                'ORDER BY id DESC '
+                'LIMIT 10'
+            )
             for i in range(0, len(result.rows)):
                 ret.append(result.rows[i][0])
 
@@ -965,24 +965,54 @@ def mostGoalsForTeam(teamID: int) -> List[int]:
 
 
 def getClosePlayers(playerID: int) -> List[int]:
-    pass
-"""
-'SELECT player_id
-FROM (SELECT COUNT(*) num, PS2.player_id
-    FROM player_scored PS1
-    LEFT JOIN player_scored PS2 ON PS1.player_id != PS2.player_id
-    WHERE PS1.match_id = PS2.match_id AND PS1.player_id = '1'
-    GROUP BY PS2.player_id
-) x
-WHERE x.num >= (SELECT COUNT(*) FROM player_scored WHERE player_id = '1')/2
-UNION DISTINCT
-SELECT distinct id as player_id
-FROM (SELECT id
-	  FROM Players
-        ) AS id2, (SELECT player_id
-					  FROM player_scored
-					  WHERE player_id = '1') AS id1
-WHERE id1.player_id != '1' AND id2.id != '1'
-ORDER BY player_id
-LIMIT 10'
-"""
+    ret = []
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        query = sql.SQL(
+            """
+            'SELECT player_id
+            FROM (SELECT COUNT(*) num, PS2.player_id
+                FROM player_scored PS1
+                LEFT JOIN player_scored PS2 ON PS1.player_id != PS2.player_id
+                WHERE PS1.match_id = PS2.match_id AND PS1.player_id = {playerID}
+                GROUP BY PS2.player_id
+            ) x
+            WHERE x.num >= (SELECT COUNT(*) FROM player_scored WHERE player_id = {playerID})/2
+            UNION DISTINCT
+            SELECT distinct id as player_id
+            FROM (SELECT id
+                  FROM Players
+                    ) AS id2, (SELECT player_id
+                                  FROM player_scored
+                                  WHERE player_id = {playerID}) AS id1
+            WHERE id1.player_id != {playerID} AND id2.id != {playerID}
+            ORDER BY player_id
+            LIMIT 10'
+            """).format(playerID=sql.Literal(playerID))
+        rows_effected, result = conn.execute(query)
+        if result.rows[0][0]:
+            for i in range(0, len(result.rows)):
+                ret.append(result.rows[i][0])
+
+    except DatabaseException.ConnectionInvalid as e:
+        print(e)
+        ret = []
+    except DatabaseException.NOT_NULL_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.CHECK_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.UNIQUE_VIOLATION as e:
+        print(e)
+        ret = []
+    except DatabaseException.FOREIGN_KEY_VIOLATION as e:
+        print(e)
+        ret = []
+    except Exception as e:
+        print(e)
+        ret = []
+    finally:
+        conn.close()
+        return ret
