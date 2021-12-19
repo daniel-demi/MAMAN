@@ -159,22 +159,22 @@ def addTeam(teamID: int) -> ReturnValue:
         query = sql.SQL("INSERT INTO Teams(id) VALUES({id});").format(id=sql.Literal(teamID))
         rows_effected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -193,22 +193,22 @@ def addMatch(match: Match) -> ReturnValue:
                  homeId=sql.Literal(match.getHomeTeamID()), awayId=sql.Literal(match.getAwayTeamID()))
         rows_effected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -253,22 +253,22 @@ def deleteMatch(match: Match) -> ReturnValue:
             ret = ReturnValue.NOT_EXISTS
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -289,22 +289,22 @@ def addPlayer(player: Player) -> ReturnValue:
         )
         rows_effected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -312,7 +312,7 @@ def addPlayer(player: Player) -> ReturnValue:
 
 
 def getPlayerProfile(playerID: int) -> Player:
-    ret = Match.badMatch()
+    ret = Player.badPlayer()
     conn = None
     try:
         conn = Connector.DBConnector()
@@ -349,22 +349,22 @@ def deletePlayer(player: Player) -> ReturnValue:
             ret = ReturnValue.NOT_EXISTS
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -382,22 +382,22 @@ def addStadium(stadium: Stadium) -> ReturnValue:
                  belongsTo=sql.Literal(stadium.getBelongsTo()))
         rows_effected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -442,22 +442,22 @@ def deleteStadium(stadium: Stadium) -> ReturnValue:
             ret = ReturnValue.NOT_EXISTS
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -478,22 +478,22 @@ def playerScoredInMatch(match: Match, player: Player, amount: int) -> ReturnValu
         )
         rows_effected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.NOT_EXISTS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -515,22 +515,22 @@ def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
             ret = ReturnValue.NOT_EXISTS
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.NOT_EXISTS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -551,22 +551,22 @@ def matchInStadium(match: Match, stadium: Stadium, attendance: int) -> ReturnVal
         )
         rows_effected, _ = conn.execute(query)
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.NOT_EXISTS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -588,22 +588,22 @@ def matchNotInStadium(match: Match, stadium: Stadium) -> ReturnValue:
             ret = ReturnValue.NOT_EXISTS
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.NOT_EXISTS
     except Exception as e:
-        print(e)
+        #print(e)
         ret = ReturnValue.ERROR
     finally:
         conn.close()
@@ -624,22 +624,22 @@ def averageAttendanceInStadium(stadiumID: int) -> float:
         else:
             ret = 0
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = -1
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = -1
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = -1
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = -1
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = -1
     except Exception as e:
-        print(e)
+        #print(e)
         ret = -1
     finally:
         conn.close()
@@ -663,22 +663,22 @@ def stadiumTotalGoals(stadiumID: int) -> int:
         else:
             ret = 0
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = -1
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = -1
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = -1
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = -1
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = -1
     except Exception as e:
-        print(e)
+        #print(e)
         ret = -1
     finally:
         conn.close()
@@ -701,22 +701,22 @@ def playerIsWinner(playerID: int, matchID: int) -> bool:
             ret = result.rows[0][0]
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = False
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = False
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = False
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = False
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = False
     except Exception as e:
-        print(e)
+        #print(e)
         ret = False
     finally:
         conn.close()
@@ -738,27 +738,27 @@ def getActiveTallTeams() -> List[int]:
             "LIMIT 5"
         )
         rows_effected, result = conn.execute(query)
-        if result.rows[0][0]:
+        if len(result.rows):
             for i in range(0, len(result.rows)):
                 ret.append(result.rows[i][0])
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except Exception as e:
-        print(e)
+        #print(e)
         ret = []
     finally:
         conn.close()
@@ -777,31 +777,31 @@ def getActiveTallRichTeams() -> List[int]:
             "AND team_id IN (SELECT * FROM rich_teams_view)"
             "GROUP BY team_id "
             "HAVING COUNT(height) >= 2 "
-            "ORDER BY team_id DESC "
+            "ORDER BY team_id "
             "LIMIT 5"
         )
         rows_effected, result = conn.execute(query)
-        if result.rows[0][0]:
+        if len(result.rows):
             for i in range(0, len(result.rows)):
                 ret.append(result.rows[i][0])
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except Exception as e:
-        print(e)
+        #print(e)
         ret = []
     finally:
         conn.close()
@@ -819,13 +819,11 @@ def popularTeams() -> List[int]:
             'LEFT JOIN match_in_stadium ON match_in_stadium.match_id = M.id '
             'WHERE  40000 < ALL('
                 'SELECT attendance '
-                'FROM match_in_stadium '
-                'WHERE match_in_stadium.stadium_id = ('
-                    'SELECT id '
-                    'FROM Stadium '
-                    'WHERE belong_to = M.home_team_id'
-                ')'
-            ') AND stadium_id IS NOT NULL '
+                'FROM Matches M2 '
+                'LEFT JOIN match_in_stadium ON match_in_stadium.match_id = M2.id '
+                'WHERE M.home_team_id = M2.home_team_id'
+            ') '
+            'AND stadium_id IS NOT NULL '
             'UNION DISTINCT '
             'SELECT id '
             'FROM Teams '
@@ -849,27 +847,27 @@ def popularTeams() -> List[int]:
             'LIMIT 10'
         )
         rows_effected, result = conn.execute(query)
-        if result.rows[0][0]:
+        if len(result.rows):
             for i in range(0, len(result.rows)):
                 ret.append(result.rows[i][0])
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        #print(e)
         ret = []
     except Exception as e:
-        print(e)
+        #print(e)
         ret = []
     finally:
         conn.close()
@@ -889,31 +887,31 @@ def getMostAttractiveStadiums() -> List[int]:
                 'LEFT JOIN match_in_stadium ON match_in_stadium.stadium_id = Stadium.id '
                 'LEFT JOIN player_scored ON match_in_stadium.match_id = player_scored.match_id '
                 'GROUP BY stadium_id, id '
-                'ORDER BY total DESC, stadium_id, id'
+                'ORDER BY total DESC, stadium_id, s_id'
             ') x'
         )
         rows_effected, result = conn.execute(query)
-        if result.rows[0][0]:
+        if len(result.rows):
             for i in range(0, len(result.rows)):
                 ret.append(result.rows[i][0])
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except Exception as e:
-        print(e)
+        # print(e)
         ret = []
     finally:
         conn.close()
@@ -938,27 +936,27 @@ def mostGoalsForTeam(teamID: int) -> List[int]:
             ') x'
         ).format(teamID=sql.Literal(teamID))
         rows_effected, result = conn.execute(query)
-        if result.rows[0][0]:
+        if len(result.rows):
             for i in range(0, len(result.rows)):
                 ret.append(result.rows[i][0])
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except Exception as e:
-        print(e)
+        # print(e)
         ret = []
     finally:
         conn.close()
@@ -971,51 +969,48 @@ def getClosePlayers(playerID: int) -> List[int]:
     try:
         conn = Connector.DBConnector()
         query = sql.SQL(
-            'SELECT player_id '
-            'FROM ('
-                'SELECT COUNT(*) num, PS2.player_id '
-                'FROM player_scored PS1 '
-                'LEFT JOIN player_scored PS2 ON PS1.player_id != PS2.player_id '
-                'WHERE PS1.match_id = PS2.match_id AND PS1.player_id = {playerID} '
-                'GROUP BY PS2.player_id'
-            ') x '
-            'WHERE x.num >= (SELECT COUNT(*) FROM player_scored WHERE player_id = {playerID})/2 '
-            'UNION DISTINCT '
-            'SELECT distinct id as player_id '
-            'FROM ('
-                'SELECT id '
-                'FROM Players'
-            ') AS id2, ('
-                'SELECT player_id '
-                'FROM player_scored '
-                'WHERE player_id = {playerID}'
-            ') AS id1 '
-            'WHERE id1.player_id != {playerID} AND id2.id != {playerID} '
-            'ORDER BY player_id '
+            'SELECT id '
+            'FROM ( '
+                'SELECT COUNT(*) num , x.id id '
+                'FROM ( '
+                    'SELECT id, COALESCE(match_id,-1) match_id, COALESCE (amount,0) amount '
+                    'FROM players P '
+                    'LEFT JOIN player_scored ps ON P.id = ps.player_id'
+                ') as x , ('
+                    'SELECT id, COALESCE(match_id,-1) match_id, COALESCE (amount,0) amount '
+                    'FROM players P '
+                    'LEFT JOIN player_scored ps ON P.id = ps.player_id'
+                ') as y '
+            'WHERE (x.match_id = y.match_id OR  y.match_id = -1) '
+                'AND x.id != y.id AND x.id != {playerID} AND y.id = {playerID} '
+            'GROUP BY x.id '
+            ') z '
+            'WHERE z.num >= (SELECT COUNT(*) FROM player_scored WHERE player_id = {playerID})/2 '
+            'ORDER BY id '
             'LIMIT 10'
             ).format(playerID=sql.Literal(playerID))
         rows_effected, result = conn.execute(query)
-        if result.rows[0][0]:
+        if len(result.rows):
             for i in range(0, len(result.rows)):
                 ret.append(result.rows[i][0])
 
     except DatabaseException.ConnectionInvalid as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.NOT_NULL_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.CHECK_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.UNIQUE_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except DatabaseException.FOREIGN_KEY_VIOLATION as e:
-        print(e)
+        # print(e)
         ret = []
     except Exception as e:
-        print(e)
+        # print(e)
         ret = []
     finally:
         conn.close()
