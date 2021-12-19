@@ -305,11 +305,55 @@ class Test(AbstractTest):
     #     self.assertEqual(ReturnValue.OK, Solution.matchInStadium(m2, s3, 45000), "Should work")
     #     self.assertEqual(ReturnValue.OK, Solution.matchInStadium(m3, s2, 35000), "Should work")
     #     self.assertEqual([2, 1, 3], Solution.getMostAttractiveStadiums(), "Should work")
+
+    def test_getMostAttractiveStadiums2(self) -> None:
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(3), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(4), "Should work")
+
+        p = Player(1, 1, 20, 195, "Left")
+        p2 = Player(2, 2, 20, 190, "Left")
+        p3 = Player(3, 1, 20, 190, "Left")
+        p4 = Player(4, 3, 20, 190, "Left")
+        m = Match(1, "Domestic", 1, 2)
+        m2 = Match(2, "Domestic", 3, 2)
+        m3 = Match(3, "Domestic", 2, 1)
+        s = Stadium(1, 65000, 1)
+        s2 = Stadium(2, 65000, 2)
+        s3 = Stadium(3, 65000, 3)
+        s4 = Stadium(4, 65000, 4)
+
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p3), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p4), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addMatch(m), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addMatch(m2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addMatch(m3), "Should work")
+
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m, p, 2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m3, p, 2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m, p2, 1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m2, p2, 4), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m3, p2, 3), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m, p3, 2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m3, p3, 1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m2, p3, 1), "Should work")
+
+        self.assertEqual(ReturnValue.OK, Solution.addStadium(s), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addStadium(s2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addStadium(s3), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addStadium(s4), "Should work")
+
+        self.assertEqual(ReturnValue.OK, Solution.matchInStadium(m, s, 45000), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.matchInStadium(m2, s3, 45000), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.matchInStadium(m3, s2, 35000), "Should work")
+        self.assertEqual([2, 1, 3, 4], Solution.getMostAttractiveStadiums(), "Should work")
     #
     # def test_mostGoalsForTeam(self) -> None:
     #     self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
     #     self.assertEqual(ReturnValue.OK, Solution.addTeam(2), "Should work")
-    #     self.assertEqual(ReturnValue.OK, Solution.addTeam(3), "Should work")
     #
     #     p = Player(1, 1, 20, 195, "Left")
     #     p2 = Player(2, 1, 20, 190, "Left")
@@ -339,6 +383,36 @@ class Test(AbstractTest):
     #     self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m2, p2, 2), "Should work")
     #     self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m2, p3, 1), "Should work")
     #     self.assertEqual([2, 6, 1, 3, 5], Solution.mostGoalsForTeam(1), "Should work")
+
+    def test_mostGoalsForTeam2(self) -> None:
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addTeam(2), "Should work")
+
+        p = Player(1, 1, 20, 195, "Left")
+        p2 = Player(2, 1, 20, 190, "Left")
+        p3 = Player(3, 1, 20, 190, "Left")
+        p4 = Player(4, 1, 20, 190, "Left")
+        p5 = Player(5, 1, 20, 190, "Left")
+        p6 = Player(6, 1, 20, 190, "Left")
+        m = Match(1, "Domestic", 1, 2)
+        m2 = Match(3, "Domestic", 2, 1)
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p3), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p4), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p5), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addPlayer(p6), "Should work")
+
+        self.assertEqual(ReturnValue.OK, Solution.addMatch(m), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.addMatch(m2), "Should work")
+
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m, p, 2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m, p2, 2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m, p3, 1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m2, p, 1), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m2, p2, 2), "Should work")
+        self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m2, p3, 1), "Should work")
+        self.assertEqual([2, 1, 3, 6, 5], Solution.mostGoalsForTeam(1), "Should work")
 
     def test_getClosePlayers(self) -> None:
         self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")

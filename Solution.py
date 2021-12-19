@@ -882,13 +882,14 @@ def getMostAttractiveStadiums() -> List[int]:
     try:
         conn = Connector.DBConnector()
         query = sql.SQL(
-            'SELECT stadium_id '
+            'SELECT x.s_id '
             'FROM ('
-                'SELECT stadium_id, SUM(amount) total '
-                'FROM match_in_stadium '
+                'SELECT id s_id, SUM(COALESCE (amount, 0)) total '
+                'FROM Stadium '
+                'LEFT JOIN match_in_stadium ON match_in_stadium.stadium_id = Stadium.id '
                 'LEFT JOIN player_scored ON match_in_stadium.match_id = player_scored.match_id '
-                'GROUP BY stadium_id '
-                'ORDER BY total DESC, stadium_id'
+                'GROUP BY stadium_id, id '
+                'ORDER BY total DESC, stadium_id, id'
             ') x'
         )
         rows_effected, result = conn.execute(query)
@@ -925,14 +926,14 @@ def mostGoalsForTeam(teamID: int) -> List[int]:
     try:
         conn = Connector.DBConnector()
         query = sql.SQL(
-            'SELECT player_id '
+            'SELECT x.p_id '
             'FROM ('
-                'SELECT player_id, SUM(amount) total '
-                'FROM player_scored '
-                'LEFT JOIN players ON player_scored.player_id = players.id '
+                'SELECT id p_id, SUM(COALESCE (amount, 0)) total '
+                'FROM players '
+                'LEFT JOIN player_scored ON players.id = player_scored.player_id '
                 'WHERE team_id = {teamID} '
-                'GROUP BY player_id '
-                'ORDER BY total DESC , player_id DESC '
+                'GROUP BY player_id, id '
+                'ORDER BY total DESC , player_id DESC, id DESC '
                 'LIMIT 5'
             ') x'
         ).format(teamID=sql.Literal(teamID))
