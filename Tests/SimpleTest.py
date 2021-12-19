@@ -142,7 +142,7 @@ class Test(AbstractTest):
     #     self.assertEqual(ReturnValue.BAD_PARAMS, Solution.matchInStadium(m, s, -500), "amount is negative")
     #     self.assertEqual(ReturnValue.OK, Solution.matchInStadium(m, s, 500), "Should work")
     #     self.assertEqual(ReturnValue.ALREADY_EXISTS, Solution.matchInStadium(m, s2, 500), "match already taking place in any stadium")
-
+    #
     # def test_matchNotInStadium(self) -> None:
     #     m = Match(1, "Domestic", 1, 2)
     #     s = Stadium(1, 55000, 1)
@@ -263,7 +263,7 @@ class Test(AbstractTest):
     #     self.assertEqual(ReturnValue.OK, Solution.matchInStadium(m2, s2, 45000), "Should work")
     #     self.assertEqual(ReturnValue.OK, Solution.matchInStadium(m3, s2, 35000), "Should work")
     #     self.assertEqual([4, 3, 1], Solution.popularTeams(), "Should work")
-
+    #
     # def test_getMostAttractiveStadiums(self) -> None:
     #     self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
     #     self.assertEqual(ReturnValue.OK, Solution.addTeam(2), "Should work")
@@ -369,7 +369,7 @@ class Test(AbstractTest):
         self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m, p3, 2), "Should work")
         self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m3, p3, 1), "Should work")
         self.assertEqual(ReturnValue.OK, Solution.playerScoredInMatch(m2, p3, 1), "Should work")
-        self.assertEqual([2,3], Solution.getClosePlayers(1), "should work")
+        self.assertEqual([2, 3], Solution.getClosePlayers(1), "should work")
 
 
 # *** DO NOT RUN EACH TEST MANUALLY ***
